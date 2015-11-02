@@ -266,12 +266,12 @@
     },
 
     _doDragEnd: function(e) {
-      this.swipeThreshold = this.el.offsetWidth * .8;
-
+      this.swipeThreshold = this.el.offsetWidth * .5;
+      
       if (e.gesture.deltaX > 0 && Math.abs(e.gesture.deltaX) > this.swipeThreshold ) {
-        this.onSwipeRight();
+        this.onCardSwipeRight();
       } else if (e.gesture.deltaX < 0 && Math.abs(e.gesture.deltaX) > this.swipeThreshold ) {
-        this.onSwipeLeft();
+        this.onCardSwipeLeft();
       }
       this._recenter();
       
@@ -290,8 +290,8 @@
       scope: {
         onCardSwipe: '&',
         onDestroy: '&',
-        onSwipeLeft: '&',
-        onSwipeRight: '&'
+        onCardSwipeLeft: '&',
+        onCardSwipeRight: '&'
       },
       link: function($scope, $element, $attr, swipeCards) {
         var el = $element[0];
@@ -304,14 +304,14 @@
               $scope.onCardSwipe();
             });
           },
-          onSwipeLeft: function() {
+          onCardSwipeLeft: function() {
             $timeout(function() {
-              $scope.onSwipeLeft();
+              $scope.onCardSwipeLeft();
             });
           },
-          onSwipeRight: function() {
+          onCardSwipeRight: function() {
             $timeout(function() {
-              $scope.onSwipeRight();
+              $scope.onCardSwipeRight();
             });
           },
           onDestroy: function() {
