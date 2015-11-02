@@ -91,7 +91,7 @@
       this.el = opts.el;
 
       this.startX = this.startY = this.x = this.y = 0;
-
+      
       this.bindEvents();
     },
 
@@ -234,12 +234,12 @@
     _doDragStart: function(e) {
       var width = this.el.offsetWidth;
       var point = window.innerWidth / 2 + this.rotationDirection * (width / 2)
-      var distance = Math.abs(point - e.gesture.touches[0].pageX);// - window.innerWidth/2);
+      var distance = Math.abs(point - e.gesture.touches[0].pageX);
       console.log(distance);
 
       this.touchDistance = distance * 10;
 
-      console.log('Touch distance', this.touchDistance);//this.touchDistance, width);
+      console.log('Touch distance', this.touchDistance);
     },
 
     _doDrag: function(e) {
@@ -251,12 +251,30 @@
         this.rotationAngle = 0;
       }
 
-      this.y = this.startY + (e.gesture.deltaY * 0.4);
-
-      this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + this.x + 'px, ' + this.y  + 'px, 0) rotate(' + (this.rotationAngle || 0) + 'rad)';
+      this.x = this.startX + e.gesture.deltaX;
+      this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + this.x + 'px, ' + this.y  + 'px, 0)';
     },
+
+    _recenter: function() {
+      var duration = 0.2;
+      var self = this;
+      self.el.style[TRANSITION] = '-webkit-transform ' + duration + 's ease-in-out';
+      self.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + this.startX + 'px, ' + this.startY + 'px, 0)';
+      setTimeout(function() {
+        self.el.style[TRANSITION] = 'none';
+      }, duration * 1000);
+    },
+
     _doDragEnd: function(e) {
-      this.transitionOut(e);
+      this.swipeThreshold = this.el.offsetWidth * .8;
+
+      if (e.gesture.deltaX > 0 && Math.abs(e.gesture.deltaX) > this.swipeThreshold ) {
+        this.onSwipeRight();
+      } else if (e.gesture.deltaX < 0 && Math.abs(e.gesture.deltaX) > this.swipeThreshold ) {
+        this.onSwipeLeft();
+      }
+      this._recenter();
+      
     }
   });
 
@@ -271,7 +289,9 @@
       transclude: true,
       scope: {
         onCardSwipe: '&',
-        onDestroy: '&'
+        onDestroy: '&',
+        onSwipeLeft: '&',
+        onSwipeRight: '&'
       },
       link: function($scope, $element, $attr, swipeCards) {
         var el = $element[0];
@@ -282,6 +302,16 @@
           onSwipe: function() {
             $timeout(function() {
               $scope.onCardSwipe();
+            });
+          },
+          onSwipeLeft: function() {
+            $timeout(function() {
+              $scope.onSwipeLeft();
+            });
+          },
+          onSwipeRight: function() {
+            $timeout(function() {
+              $scope.onSwipeRight();
             });
           },
           onDestroy: function() {
